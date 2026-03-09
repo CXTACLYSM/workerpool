@@ -21,17 +21,16 @@ func main() {
 		wg.Add(1)
 		go startWorker(i, tasks, results, &wg)
 	}
-
-	go func() {
-		defer close(tasks)
-		for i := 0; i < numTasks; i++ {
-			tasks <- i
-		}
-	}()
-
 	go func() {
 		wg.Wait()
 		close(results)
+	}()
+
+	go func() {
+		defer close(tasks)
+		for i := 1; i < numTasks+1; i++ {
+			tasks <- i
+		}
 	}()
 
 	sum := 0
@@ -47,8 +46,13 @@ func main() {
 func startWorker(id int, jobs <-chan int, results chan<- Result, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for job := range jobs {
-		fmt.Printf("worker-%d processing task: %d\n", id, job)
-		results <- Result{Value: job * job}
+		value := executeTask(id, job)
+		results <- Result{Value: value}
 	}
 	fmt.Printf("worker-%d done\n", id)
+}
+
+func executeTask(workerId int, task int) int {
+	fmt.Printf("worker-%d processing task: %d\n", workerId, task)
+	return task * task
 }
