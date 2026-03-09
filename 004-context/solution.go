@@ -17,7 +17,7 @@ func main() {
 	numWorkers := 3
 
 	tasks := make(chan int, numTasks)
-	results := make(chan Result, 1)
+	results := make(chan Result, numWorkers)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
